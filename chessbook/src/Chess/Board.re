@@ -64,7 +64,7 @@ module Square = {
 // 32 squares
 let boardSquares = Belt.Array.(
   map(range(0, 7), x => map(range(0, 7), y => 
-    <Square coord=(x, y)> 
+    <Square coord=(x, y) key={j|$x$y|j}> 
       <rect 
          width=Js.Int.toString(Settings.squareSize) 
          height=Js.Int.toString(Settings.squareSize)
@@ -118,11 +118,20 @@ let make = (~setup:Chess.setup) => {
     {
       setup
       ->Chess.pieces
-      ->Map.reduce([||], ((acc, at, piece) => Array.concat([|<Cell cell={at, piece} />|], acc)))
+      ->Map.reduce([||], ((acc, at, piece) => Array.concat([|<Cell key={j|$at|j} cell={at, piece} />|], acc)))
       ->React.array
     }
   </svg>
 }
+
+    /* {Array.( */
+    /*   setup->Chess.pieces >>= (row) => */
+    /*   row                 >>= (occ) => */
+    /*     switch occ { */
+    /*     | Some((color, role)) => <Cell cell={((0,0), piece)} /> */
+    /*     | None                => React.null */
+    /*     } */
+    /* )} */
 
 /*   // compute the board coordinates of a square from its name */
 /*   squareLocation(sq: SquareName): [number,number] { */

@@ -17,7 +17,9 @@
   "bs-dependencies": [
     "reason-react",
     "bs-css",
-    "bs-css-emotion"
+    "bs-css-emotion",
+    "bs-bastet",
+    "relude"
   ],
   "refmt": 3
 }

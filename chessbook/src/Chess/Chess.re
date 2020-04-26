@@ -1,3 +1,4 @@
+// open Relude;
 open Belt;
 
 type color = White | Black;
@@ -50,7 +51,11 @@ type role =
   | Rook
   | Pawn
 
-type piece = (color, role);
+type piece    = (color, role);
+type occupant = option(piece)
+
+// row major board
+// type board = array(array(occupant))
 type board = Belt.Map.t(square, piece, SquareComparable.identity);
 type cell  = 
   { at: square
@@ -67,6 +72,9 @@ type setup =
   , plies: int
   }
 
+/* module Board { */
+/*   let empty: board = Array.repeat(8, Array.repeat(8, None)) */
+/* } */
 module Board {
   let empty:board = {
     Belt.Map.make(~id=(module SquareComparable))
