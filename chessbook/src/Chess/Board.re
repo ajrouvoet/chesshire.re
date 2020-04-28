@@ -3,6 +3,17 @@ open Relude.Globals
 
 [@bs.val] external document: Js.t({..}) = "document";
 
+// missing from React bindings
+module BoundingRect {
+  type t = {
+    left: int, top: int, right: int, bottom: int
+  };
+  
+  let make = { left: 0, top: 0, right: 0, bottom: 0 };
+}
+
+[@bs.send] external getBoundingClientRect : (Dom.element) => BoundingRect.t = "getBoundingClientRect";
+
 module Styles {
   open Css
 
@@ -26,6 +37,27 @@ module Styles {
 module Settings {
   let squareSize = 40
   let size       = squareSize * 8
+
+  // assumes the pos is in the board's dimensions
+  let squareFromCoordinate = (pos: (int , int)): square => {
+    let (x, y) = pos;
+
+    (x / squareSize , (size - y) / squareSize);
+  }
+
+  // validates the coordinates
+  let squareFromClient(board: BoundingRect.t, coord: (int, int)): option(square) {
+    let (clientX, clientY) = coord
+
+    if (clientX < board.left || clientX > board.right || clientY < board.top || clientY > board.bottom) {
+      None
+    } else {
+      let x = clientX - board.left
+      let y = clientY - board.top
+
+      Some(squareFromCoordinate((x, y)))
+    }
+  }
 }
   
 let even = (y: int) => y mod 2 == 0
@@ -37,6 +69,7 @@ let squareColor = (sq: square): color => {
 let colorClass = (c: color): string => switch (c) {
   | White => Styles.whiteSquare
   | Black => Styles.blackSquare
+
 };
 
 module BlackPattern { 
@@ -131,14 +164,20 @@ module Piece {
     }
   };
 
+  type dropHandler = (piece, DraggableCore.draggableData) => bool;
+
   [@react.component]
-  let make = (~piece: piece) => {
+  let make = (~piece: piece, ~onDrop=?) => {
     open DraggableCore;
     let (dragging:option(draggableData), setDragging) = React.useState(() => None);
 
     let start = (_, _)    => { true };
     let drag  = (_, data) => { setDragging(_ => Some(data)); true };
-    let stop  = (_, _)    => { setDragging(_ => None); true};
+    let stop  = (_, data) => { 
+      setDragging(_ => None); 
+      ignore(onDrop|>Option.map(h => h(piece, data))); 
+      true
+    };
 
     <>
       <DraggableCore onStart=start onDrag=drag onStop=stop>
@@ -154,8 +193,8 @@ module Piece {
 
 module Cell {
   [@react.component]
-  let make = (~cell:Chess.cell) => {
-    <Square coord=cell.at><Piece piece=cell.piece /></Square>
+  let make = (~cell:Chess.cell, ~onDrop=?) => {
+    <Square coord=cell.at><Piece piece=cell.piece ?onDrop/></Square>
   }
 }
 
@@ -163,7 +202,26 @@ module Cell {
 let make = (~setup:Chess.setup) => {
   open Settings;
 
-  <svg className=(Styles.board) width=Int.toString(size) height=Int.toString(size)>
+  // keep track of the bounding box of the board, for translating
+  // screen coordinates to board coordinates
+  let box = ref(BoundingRect.make)
+  let updateBox = (ref) => {
+    switch (Js.Nullable.toOption(ref)) {
+    | Some(el) => box := getBoundingClientRect(el)
+    | None     => box := BoundingRect.make
+    }
+  };
+  
+  let onPieceDrop = (piece, data) => {
+    open DraggableCore;
+    Js.Console.log(piece);
+    Js.Console.log(squareFromClient(box^, (data.x, data.y)))
+  };
+
+  <svg 
+    className=(Styles.board) width=Int.toString(size) height=Int.toString(size)
+    ref={ReactDOMRe.Ref.callbackDomRef(updateBox)}
+    >
     <defs>
       <BlackPattern />
     </defs>
@@ -172,34 +230,10 @@ let make = (~setup:Chess.setup) => {
       setup
       |>Chess.pieces
       |>Map.foldLeft(
-          (acc, at, piece) => Array.cons(<Cell key={j|$at|j} cell={at, piece} />, acc),
+          (acc, at, piece) => Array.cons(<Cell key={j|$at|j} cell={at, piece} onDrop=onPieceDrop />, acc),
           [||]
         )
       |>React.array
     }
   </svg>
 }
-
-/*   // compute the board coordinates of a square from its name */
-/*   squareLocation(sq: SquareName): [number,number] { */
-/*     let x = sq[0].charCodeAt(0) - 97 */
-/*     let y = sq[1].charCodeAt(0) - 48 */
-
-/*     return [x * SQ, DIM - y * SQ] */
-/*   } */
-    
-/*   squareFromCoordinate(co: Position): SquareName { */
-/*     let x = Math.trunc(co.x / SQ) */
-/*     let y = Math.trunc((DIM - co.y) / SQ) + 1 */
-      
-/*     return ('abcdefgh'[x] + y.toString() as SquareName) */
-/*   } */
-
-/*   squareFromScreenCoordinate(ev: MouseEvent): SquareName { */
-/*     let can = (this.canvas.current as Element).getBoundingClientRect() */
-      
-/*     let x = ev.clientX - can.x */
-/*     let y = ev.clientY - can.y */
-      
-/*     return this.squareFromCoordinate({x, y}) */
-/*   } */
