@@ -20,12 +20,19 @@
     "bs-css-emotion": "^1.2.0",
     "react": "^16.8.1",
     "react-dom": "^16.8.1",
+    "react-draggable": "^4.3.1",
     "reason-react": ">=0.7.0",
     "relude": "^0.62.0"
   },
   "devDependencies": {
     "bs-let": "^0.1.16",
     "bs-platform": "^7.2.2",
-    "moduleserve": "^0.9.0"
+    "moduleserve": "^0.9.0",
+    "parcel-plugin-static-files-copy": "^2.3.1"
+  },
+  "staticFiles": {
+    "staticPath": "assets",
+    "watcherGlob": "**"
   }
+
 }

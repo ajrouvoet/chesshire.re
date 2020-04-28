@@ -1,5 +1,7 @@
 open Chess
-open Belt
+open Relude.Globals
+
+[@bs.val] external document: Js.t({..}) = "document";
 
 module Styles {
   open Css
@@ -52,11 +54,16 @@ module BlackPattern {
 
 module Square = {
   [@react.component]
-  let make = (~coord:square, ~children:React.element) => {
+  let make = (~coord:square, ~children:React.element, ~flip=false) => {
     open Settings;
     let (xc,yc) = coord;
-    let x = Js.Int.toString(xc * squareSize);
-    let y = Js.Int.toString(yc * squareSize);
+
+    let (x, y) = if(flip) {
+      (Js.Int.toString(xc * squareSize), Js.Int.toString(yc * squareSize))
+    } else {
+      (Js.Int.toString(xc * squareSize), Js.Int.toString((7-yc) * squareSize))
+    };
+
     <g transform={j|translate($x, $y)|j}>{children}</g>
   };
 };
@@ -88,14 +95,60 @@ module Piece {
     | (Black, Bishop) => "b-bishop.svg"
     | (Black, Pawn)   => "b-pawn.svg"
   };
+  
+  module Image {
+    [@react.component]
+    let make = (~piece: piece, ~onMouseDown=?, ~onMouseUp=?, ~onTouchStart=?, ~onTouchEnd=?) => {
+      open Settings;
+      <image 
+        href={image(piece)} 
+        width=Js.Int.toString(squareSize) 
+        height=Js.Int.toString(squareSize) 
+        ?onMouseDown ?onMouseUp ?onTouchStart ?onTouchEnd />
+    }
+  };
+
+  module Overlay {
+    [@react.component]
+    let make = (~piece: piece, ~pos: (int, int)) => {
+      open Settings;
+      let (x, y) = pos;
+
+      let svgStyle = Css.(style([
+        position(absolute),
+        left(px(x - squareSize / 2)),
+        top(px(y - squareSize / 2)),
+      ]))
+
+      // render the dragged piece directly on the document body
+      // so that it can go outside of the boundary of the board
+      ReactDOMRe.createPortal(
+        <svg className=svgStyle>
+          <Image piece />
+        </svg>,
+        document##body
+      )
+    }
+  };
 
   [@react.component]
   let make = (~piece: piece) => {
-    open Settings;
-    <image 
-      href={image(piece)} 
-      width=Js.Int.toString(squareSize) 
-      height=Js.Int.toString(squareSize) />
+    open DraggableCore;
+    let (dragging:option(draggableData), setDragging) = React.useState(() => None);
+
+    let start = (_, _)    => { true };
+    let drag  = (_, data) => { setDragging(_ => Some(data)); true };
+    let stop  = (_, _)    => { setDragging(_ => None); true};
+
+    <>
+      <DraggableCore onStart=start onDrag=drag onStop=stop>
+        { switch dragging {
+          | None       => <Image piece />
+          | Some(data) => <Overlay piece pos=(data.x, data.y) />
+        }}
+      </DraggableCore>
+    </>
+
   };
 }
 
@@ -117,21 +170,15 @@ let make = (~setup:Chess.setup) => {
     {boardSquares}
     {
       setup
-      ->Chess.pieces
-      ->Map.reduce([||], ((acc, at, piece) => Array.concat([|<Cell key={j|$at|j} cell={at, piece} />|], acc)))
-      ->React.array
+      |>Chess.pieces
+      |>Map.foldLeft(
+          (acc, at, piece) => Array.cons(<Cell key={j|$at|j} cell={at, piece} />, acc),
+          [||]
+        )
+      |>React.array
     }
   </svg>
 }
-
-    /* {Array.( */
-    /*   setup->Chess.pieces >>= (row) => */
-    /*   row                 >>= (occ) => */
-    /*     switch occ { */
-    /*     | Some((color, role)) => <Cell cell={((0,0), piece)} /> */
-    /*     | None                => React.null */
-    /*     } */
-    /* )} */
 
 /*   // compute the board coordinates of a square from its name */
 /*   squareLocation(sq: SquareName): [number,number] { */
