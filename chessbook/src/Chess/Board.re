@@ -63,7 +63,7 @@ module Settings {
 let even = (y: int) => y mod 2 == 0
 let squareColor = (sq: square): color => {
   let (x, y) = sq;
-  even(y) ? (even(x) ? White : Black) : (even(x) ? Black : White)
+  even(y) ? (even(x) ? Black : White) : (even(x) ? White : Black)
 };
 
 let colorClass = (c: color): string => switch (c) {
@@ -87,14 +87,13 @@ module BlackPattern {
 
 module Square = {
   [@react.component]
-  let make = (~coord:square, ~children:React.element, ~flip=false) => {
+  let make = (~coord:square, ~children:React.element, ~perspective=White) => {
     open Settings;
     let (xc,yc) = coord;
 
-    let (x, y) = if(flip) {
-      (Js.Int.toString(xc * squareSize), Js.Int.toString(yc * squareSize))
-    } else {
-      (Js.Int.toString(xc * squareSize), Js.Int.toString((7-yc) * squareSize))
+    let (x, y) = switch perspective {
+      | Black => (Js.Int.toString((7-xc) * squareSize), Js.Int.toString(yc * squareSize))
+      | White => (Js.Int.toString(xc * squareSize), Js.Int.toString((7-yc) * squareSize))
     };
 
     <g transform={j|translate($x, $y)|j}>{children}</g>
