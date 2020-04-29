@@ -3,6 +3,14 @@ open Belt;
 
 type color = White | Black;
 
+module Color {
+  let fromString = (name: string): option(color) => switch name {
+    | "white" => Some(White)
+    | "black" => Some(Black)
+    | _       => None
+  };
+}
+
 type square = (int, int);
 
 module SquareComparable =
@@ -51,6 +59,18 @@ type role =
   | Rook
   | Pawn
 
+module Role {
+  let fromString = (r: string): option(role) => switch r {
+    | "king"   => Some(King)
+    | "queen"  => Some(Queen)
+    | "bishop" => Some(Bishop)
+    | "knight" => Some(Knight)
+    | "rook"   => Some(Rook)
+    | "pawn"   => Some(Pawn)
+    | _        => None
+  }
+}
+
 type piece    = (color, role);
 type occupant = option(piece)
 
@@ -62,7 +82,6 @@ type cell  =
   , piece: piece
   };
 
-[@bs.deriving {abstract: light}]
 type setup = 
   { pieces: board
   , pockets: byColor(material)
@@ -72,9 +91,6 @@ type setup =
   , plies: int
   }
 
-/* module Board { */
-/*   let empty: board = Array.repeat(8, Array.repeat(8, None)) */
-/* } */
 module Board {
   let empty:board = {
     Belt.Map.make(~id=(module SquareComparable))
@@ -117,12 +133,12 @@ module Board {
 }
   
 module Setup {
-  let default:setup = setup(
-    ~pieces=Board.default,
-    ~pockets=byColor(~white=Material.empty, ~black=Material.empty),
-    ~turn=White,
-    ~castling=byColor(~white=true, ~black=true),
-    ~epSquare=None,
-    ~plies=0
-  );
+  let default:setup = {
+    pieces   : Board.default,
+    pockets  : byColor(~white=Material.empty, ~black=Material.empty),
+    turn     : White,
+    castling : byColor(~white=true, ~black=true),
+    epSquare : None,
+    plies    : 0
+  };
 }

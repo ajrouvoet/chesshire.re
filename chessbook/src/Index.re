@@ -1,3 +1,5 @@
+open Relude.Globals;
+
 [@bs.val] external document: Js.t({..}) = "document";
 
 // create the mountpoint
@@ -74,12 +76,18 @@ module Head {
   
 module App {
   let setup:Chess.setup = Chess.Setup.default;
+  
+  let parsed = 
+    Fen.parse("rnbq1rk1/ppp1ppb1/3p1npp/8/3PP1P1/2N1B3/PPP1BP1P/R2QK1NR w KQ - 0 1")
+    |> BsResult.value
+    |> Fen.board
+    |> Option.getOrElse(Chess.Board.default);
 
   [@react.component]
   let make = () => {
     <>
       <Head />
-      <Board setup />
+      <Board setup=({...setup, pieces: parsed}) />
     </>
   }
 }

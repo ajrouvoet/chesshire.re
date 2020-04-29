@@ -3,7 +3,6 @@ open Relude.Globals
 
 [@bs.val] external document: Js.t({..}) = "document";
 
-// missing from React bindings
 module BoundingRect {
   type t = {
     left: int, top: int, right: int, bottom: int
@@ -12,6 +11,7 @@ module BoundingRect {
   let make = { left: 0, top: 0, right: 0, bottom: 0 };
 }
 
+// missing from React bindings
 [@bs.send] external getBoundingClientRect : (Dom.element) => BoundingRect.t = "getBoundingClientRect";
 
 module Styles {
@@ -227,13 +227,12 @@ let make = (~setup:Chess.setup) => {
     </defs>
     {boardSquares}
     {
-      setup
-      |>Chess.pieces
-      |>Map.foldLeft(
+      setup.pieces
+      |> Map.foldLeft(
           (acc, at, piece) => Array.cons(<Cell key={j|$at|j} cell={at, piece} onDrop=onPieceDrop />, acc),
           [||]
         )
-      |>React.array
+      |> React.array
     }
   </svg>
 }
