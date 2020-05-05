@@ -582,6 +582,11 @@ regenerator-runtime@^0.13.4:
   resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.13.5.tgz#d878a1d094b4306d10b9096484b33ebd55e26697"
   integrity sha512-ZS5w8CpKFinUzOwW3c83oPeVXoNsrLsaCoLtJvAClH135j/R77RuymhiSErhm2lKcwSCIpmvIWSbDkIfAqKQlA==
 
+relude-parse@^0.8.0:
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/relude-parse/-/relude-parse-0.8.0.tgz#6aa7e2b1d5bc1b28d4ee2eb0a304c63f73fad25c"
+  integrity sha512-KsPpD4Wi5Nswe9FpeT5I2/DvD+pClgB6kmVXYqd94WrS6wxsxHUyl0ueSGWTTjbsrubNSph2YtxD1zElIGdBbA==
+
 relude@^0.62.0:
   version "0.62.0"
   resolved "https://registry.yarnpkg.com/relude/-/relude-0.62.0.tgz#f7dfa094a0adbaf37908867c7efd28a7ca6b3b53"

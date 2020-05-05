@@ -19,7 +19,8 @@
     "bs-css",
     "bs-css-emotion",
     "bs-bastet",
-    "relude"
+    "relude",
+    "relude-parse"
   ],
   "refmt": 3
 }

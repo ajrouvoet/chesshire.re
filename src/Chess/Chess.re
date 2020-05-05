@@ -1,5 +1,4 @@
-// open Relude;
-open Belt;
+open Relude.Globals;
 
 type color = White | Black;
 
@@ -11,7 +10,7 @@ module Color {
   };
 }
 
-type square = (int, int);
+type square = int;
 
 module SquareComparable =
   Belt.Id.MakeComparable({
@@ -60,23 +59,39 @@ type role =
   | Pawn
 
 module Role {
-  let fromString = (r: string): option(role) => switch r {
-    | "king"   => Some(King)
-    | "queen"  => Some(Queen)
+  let fromChar = (r: string): option(role) => String.(switch (toLowerCase(r)) {
+    | "k" => Some(King)
+    | "q" => Some(Queen)
+    | "b" => Some(Bishop)
+    | "n" => Some(Knight)
+    | "r" => Some(Rook)
+    | "p" => Some(Pawn)
+    | _   => None
+  });
+
+  let fromString = (r: string): option(role) => String.(switch (toLowerCase(r)) {
+    | "king" => Some(King)
+    | "queen" => Some(Queen)
     | "bishop" => Some(Bishop)
     | "knight" => Some(Knight)
-    | "rook"   => Some(Rook)
-    | "pawn"   => Some(Pawn)
-    | _        => None
-  }
+    | "rook" => Some(Rook)
+    | "pawn" => Some(Pawn)
+    | _   => None
+  });
 }
 
 type piece    = (color, role);
-type occupant = option(piece)
 
-// row major board
-// type board = array(array(occupant))
-type board = Belt.Map.t(square, piece, SquareComparable.identity);
+module Piece {
+  let fromSAN = (p: string): option(piece) => {
+    let color = String.toLowerCase(p) == p ? White : Black;
+    Role.fromChar(p) |> Option.map(r => (color, r))
+  }
+}
+
+type occupant = option(piece)
+type board = array(occupant)
+
 type cell  = 
   { at: square
   , piece: piece
@@ -93,25 +108,17 @@ type setup =
 
 module Board {
   let empty:board = {
-    Belt.Map.make(~id=(module SquareComparable))
+    Array.repeat(64, None)
   };
 
-  let make = (pieces: array((square, piece))):board =>
-    Belt.Map.fromArray(pieces, ~id=(module SquareComparable));
-  
-  let union = (left: board, right: board): board => {
+  let (&) = (left: board, right: board): board => {
     open Map;
     
-    let rightBiased = (_, l, r) => switch r {
-      | Some(v) => Some(v)
-      | None    => l
-    };
-    
-    merge(left, right, rightBiased)
+    left |> mapWithIndex((n, p) => right |> Array.at(n) |> Option.orElse(p))
   };
 
-  let pawnRank = (y:int, c):board => make(Array.(
-    map(range(0, 7), x => ((x, y), (c, Pawn)))
+  let pawnRank = (y:int, c): board => make(
+    Array.makeWithIndex(7, x => ((x, y), (c, Pawn))
   ));
   
   let defaultPieceRank = (y:int, c:color):board => make([|
