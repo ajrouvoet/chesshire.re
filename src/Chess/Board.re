@@ -100,7 +100,7 @@ module Square = {
   };
 };
 
-// 32 squares
+// 64 squares
 let boardSquares = Belt.Array.(
   map(range(0, 7), x => map(range(0, 7), y => 
     <Square coord=(x, y) key={j|$x$y|j}> 
@@ -234,7 +234,7 @@ let make = (~setup:Chess.setup) => {
       setup.pieces
       |> Array.mapWithIndex((occ, at) =>
           <Cell key={j|$at|j}
-                at=Chess.Square.getCoord(at)
+                at=Chess.Square.toCoord(at)
                 occupant=occ
                 onDrop=onPieceDrop />
         )

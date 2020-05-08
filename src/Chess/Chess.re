@@ -23,7 +23,14 @@ module SquareComparable =
 type squares = Belt.Set.t(square, SquareComparable.identity);
 
 module Square = {
-  let getCoord = (sq: square): squareCoord => (sq mod 8, sq / 8);
+  let toCoord   = (sq: square): squareCoord => (sq mod 8, sq / 8);
+  let fromCoord = ((x, y): squareCoord): square => y * 8 + x;
+  let fromName  = (name: string) => {
+    open Option.Infix;
+    String.charCodeAt(0, name) >>= f =>
+    String.charCodeAt(1, name) >>= r => 
+      Some(fromCoord((f - 97 , r - 48)))
+  }
 }
 
 module Squares = {
@@ -109,7 +116,8 @@ type setup =
   , turn: color
   , castling: byColor(sides)
   , epSquare: option(square)
-  , plies: int
+  , halfmoves: int // since last capture or pawn advance
+  , fullmoves: int
   }
 
 module Board {
@@ -120,7 +128,7 @@ module Board {
   };
 
   let (||) = (left: board, right: board): board =>
-    Array.zipWith(((l, r) => r), left, right);
+    Array.zipWith(((l, r) => Option.(orElse(r, l))), left, right);
 
   let pawnRank = c => Array.repeat(8, Some((c, Pawn)));
   
@@ -128,19 +136,19 @@ module Board {
     Some((c, Rook)),
     Some((c, Knight)),
     Some((c, Bishop)),
-    Some((c, Queen)),
     Some((c, King)),
+    Some((c, Rook)),
     Some((c, Bishop)),
     Some((c, Knight)),
     Some((c, Rook))
   |]
 
   let default:board = Array.flatten(
-    [| defaultPieceRank(White)
-     , pawnRank(White)
-     , emptyRanks(4)
+    [| defaultPieceRank(Black)
      , pawnRank(Black)
-     , defaultPieceRank(Black)
+     , emptyRanks(4)
+     , pawnRank(White)
+     , defaultPieceRank(White)
      |])
 }
   
@@ -151,6 +159,7 @@ module Setup {
     turn     : White,
     castling : byColor(~white=BothSides, ~black=BothSides),
     epSquare : None,
-    plies    : 0
+    halfmoves: 0,
+    fullmoves: 0
   };
 }
