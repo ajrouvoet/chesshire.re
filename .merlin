@@ -1,22 +1,22 @@
 ####{BSB GENERATED: NO EDIT
 B lib/bs
 FLG -open ReasonReactExamples
-FLG -ppx '/home/arjen/projects/chessbook.bs/chessbook/node_modules/bs-platform/linux/bsc.exe -as-ppx -bs-jsx 3'
-S /home/arjen/projects/chessbook.bs/chessbook/node_modules/bs-platform/lib/ocaml
-B /home/arjen/projects/chessbook.bs/chessbook/node_modules/bs-platform/lib/ocaml
+FLG -ppx '/home/arjen/projects/chessbook.bs/node_modules/bs-platform/linux/bsc.exe -as-ppx -bs-jsx 3'
+S /home/arjen/projects/chessbook.bs/node_modules/bs-platform/lib/ocaml
+B /home/arjen/projects/chessbook.bs/node_modules/bs-platform/lib/ocaml
 FLG -w +a-4-9-40-41-42-50-61-102
-S /home/arjen/projects/chessbook.bs/chessbook/node_modules/reason-react/lib/ocaml
-B /home/arjen/projects/chessbook.bs/chessbook/node_modules/reason-react/lib/ocaml
-S /home/arjen/projects/chessbook.bs/chessbook/node_modules/bs-css/lib/ocaml
-B /home/arjen/projects/chessbook.bs/chessbook/node_modules/bs-css/lib/ocaml
-S /home/arjen/projects/chessbook.bs/chessbook/node_modules/bs-css-emotion/lib/ocaml
-B /home/arjen/projects/chessbook.bs/chessbook/node_modules/bs-css-emotion/lib/ocaml
-S /home/arjen/projects/chessbook.bs/chessbook/node_modules/bs-bastet/lib/ocaml
-B /home/arjen/projects/chessbook.bs/chessbook/node_modules/bs-bastet/lib/ocaml
-S /home/arjen/projects/chessbook.bs/chessbook/node_modules/relude/lib/ocaml
-B /home/arjen/projects/chessbook.bs/chessbook/node_modules/relude/lib/ocaml
-S /home/arjen/projects/chessbook.bs/chessbook/node_modules/relude-parse/lib/ocaml
-B /home/arjen/projects/chessbook.bs/chessbook/node_modules/relude-parse/lib/ocaml
+S /home/arjen/projects/chessbook.bs/node_modules/reason-react/lib/ocaml
+B /home/arjen/projects/chessbook.bs/node_modules/reason-react/lib/ocaml
+S /home/arjen/projects/chessbook.bs/node_modules/bs-css/lib/ocaml
+B /home/arjen/projects/chessbook.bs/node_modules/bs-css/lib/ocaml
+S /home/arjen/projects/chessbook.bs/node_modules/bs-css-emotion/lib/ocaml
+B /home/arjen/projects/chessbook.bs/node_modules/bs-css-emotion/lib/ocaml
+S /home/arjen/projects/chessbook.bs/node_modules/bs-bastet/lib/ocaml
+B /home/arjen/projects/chessbook.bs/node_modules/bs-bastet/lib/ocaml
+S /home/arjen/projects/chessbook.bs/node_modules/relude/lib/ocaml
+B /home/arjen/projects/chessbook.bs/node_modules/relude/lib/ocaml
+S /home/arjen/projects/chessbook.bs/node_modules/relude-parse/lib/ocaml
+B /home/arjen/projects/chessbook.bs/node_modules/relude-parse/lib/ocaml
 S src
 B lib/bs/src
 S src/Chess
