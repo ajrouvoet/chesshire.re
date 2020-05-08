@@ -53,13 +53,16 @@
 open Chess;
 open Relude.Globals;
 
-module FenParser {
+module Parser {
   module P = ReludeParse.Parser;
   open P.Infix;
 
   let piece = 
        P.anyChar
-    |> P.map(Piece.fromSAN);  
+    |> P.map(Piece.fromSAN)
+    |> P.filter(p => switch p {
+      | Some(_) => true
+      | None    => false });  
 
   let space = 
        P.anyDigitAsInt
@@ -67,17 +70,22 @@ module FenParser {
   
   let rank  = 
        ((piece |> P.map(p => [| p |])) <|> space) 
-    |> P.times(8) 
+    |> P.many
     |> P.map(List.toArray) 
     |> P.map(Array.flatten);
    
-  let board = P.times(8, rank <* P.str("/"));
+  let board = rank
+    |> P.sepBy(P.str("/"))
+    |> P.map(List.toArray)
+    |> P.filter(a => Array.length(a) == 8)
+    |> P.map(Array.flatten);
 };
 
-/* let parse = (fen: string): setup = { */
-/*   let _ = ReludeParse.Parser.(runParser); */
+let parse = (fen: string): option(setup) => {
+  open ReludeParse.Parser;
 
-/*   let board = FenParser.board |> runParser; */
-  
-/*   {...Setup.default, pieces = Board.make(board)} */
-/* }; */
+  Parser.board
+    |> runParser(fen)
+    |> Result.toOption
+    |> Option.map(board => ({...Setup.default, pieces: board}))
+};

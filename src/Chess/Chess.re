@@ -11,6 +11,7 @@ module Color {
 }
 
 type square = int;
+type squareCoord = (int, int);
 
 module SquareComparable =
   Belt.Id.MakeComparable({
@@ -19,6 +20,10 @@ module SquareComparable =
   });
 
 type squares = Belt.Set.t(square, SquareComparable.identity);
+
+module Square = {
+  let getCoord = (sq: square): squareCoord => (7 - (sq mod 8), sq / 8);
+}
 
 module Squares = {
   let empty:squares = Belt.Set.make(~id=(module SquareComparable));
@@ -93,7 +98,7 @@ type occupant = option(piece)
 type board = array(occupant)
 
 type cell  = 
-  { at: square
+  { at: squareCoord
   , piece: piece
   };
 
@@ -107,36 +112,35 @@ type setup =
   }
 
 module Board {
-  let empty:board = {
-    Array.repeat(64, None)
+  type rank = array(occupant);
+
+  let emptyRanks = (n) => {
+    Array.repeat(n*8, None)
   };
 
-  let (&) = (left: board, right: board): board => {
-    open Map;
-    
-    left |> mapWithIndex((n, p) => right |> Array.at(n) |> Option.orElse(p))
-  };
+  let (||) = (left: board, right: board): board =>
+    Array.zipWith(((l, r) => r), left, right);
 
-  let pawnRank = (y:int, c): board => make(
-    Array.makeWithIndex(7, x => ((x, y), (c, Pawn))
-  ));
+  let pawnRank = c => Array.repeat(8, Some((c, Pawn)));
   
-  let defaultPieceRank = (y:int, c:color):board => make([|
-    ((0, y), (c, Rook)),
-    ((1, y), (c, Knight)),
-    ((2, y), (c, Bishop)),
-    ((3, y), (c, Queen)),
-    ((4, y), (c, King)),
-    ((5, y), (c, Bishop)),
-    ((6, y), (c, Knight)),
-    ((7, y), (c, Rook))
-  |])
+  let defaultPieceRank = (c:color): rank => [|
+    Some((c, Rook)),
+    Some((c, Knight)),
+    Some((c, Bishop)),
+    Some((c, Queen)),
+    Some((c, King)),
+    Some((c, Bishop)),
+    Some((c, Knight)),
+    Some((c, Rook))
+  |]
 
-  let default:board = empty
-    ->union(defaultPieceRank(0, White))
-    ->union(pawnRank(1, White))
-    ->union(pawnRank(6, Black))
-    ->union(defaultPieceRank(7, Black));
+  let default:board = Array.flatten(
+    [| defaultPieceRank(White)
+     , pawnRank(White)
+     , emptyRanks(4)
+     , pawnRank(Black)
+     , defaultPieceRank(Black)
+     |])
 }
   
 module Setup {

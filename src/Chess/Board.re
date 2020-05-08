@@ -39,14 +39,14 @@ module Settings {
   let size       = squareSize * 8
 
   // assumes the pos is in the board's dimensions
-  let squareFromCoordinate = (pos: (int , int)): square => {
+  let squareFromCoordinate = (pos: (int , int)): squareCoord => {
     let (x, y) = pos;
 
     (x / squareSize , (size - y) / squareSize);
   }
 
   // validates the coordinates
-  let squareFromClient(board: BoundingRect.t, coord: (int, int)): option(square) {
+  let squareFromClient(board: BoundingRect.t, coord: (int, int)): option(squareCoord) {
     let (clientX, clientY) = coord
 
     if (clientX < board.left || clientX > board.right || clientY < board.top || clientY > board.bottom) {
@@ -61,7 +61,7 @@ module Settings {
 }
   
 let even = (y: int) => y mod 2 == 0
-let squareColor = (sq: square): color => {
+let squareColor = (sq: squareCoord): color => {
   let (x, y) = sq;
   even(y) ? (even(x) ? Black : White) : (even(x) ? White : Black)
 };
@@ -87,7 +87,7 @@ module BlackPattern {
 
 module Square = {
   [@react.component]
-  let make = (~coord:square, ~children:React.element, ~perspective=White) => {
+  let make = (~coord:squareCoord, ~children:React.element, ~perspective=White) => {
     open Settings;
     let (xc,yc) = coord;
 
@@ -192,8 +192,13 @@ module Piece {
 
 module Cell {
   [@react.component]
-  let make = (~cell:Chess.cell, ~onDrop=?) => {
-    <Square coord=cell.at><Piece piece=cell.piece ?onDrop/></Square>
+  let make = (~at:squareCoord, ~occupant:occupant, ~onDrop=?) => {
+    <Square coord=at>
+      { switch occupant {
+        | Some(piece) => <Piece piece ?onDrop/>
+        | None        => React.null
+      }}
+    </Square>
   }
 }
 
@@ -227,9 +232,11 @@ let make = (~setup:Chess.setup) => {
     {boardSquares}
     {
       setup.pieces
-      |> Map.foldLeft(
-          (acc, at, piece) => Array.cons(<Cell key={j|$at|j} cell={at, piece} onDrop=onPieceDrop />, acc),
-          [||]
+      |> Array.mapWithIndex((occ, at) =>
+          <Cell key={j|$at|j}
+                at=Chess.Square.getCoord(at)
+                occupant=occ
+                onDrop=onPieceDrop />
         )
       |> React.array
     }
