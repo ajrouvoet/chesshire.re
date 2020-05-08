@@ -77,8 +77,11 @@ module Head {
 module App {
   let setup:Chess.setup = Chess.Setup.default;
   let parsed =
-    Fen.parse("rnbq1rk1/ppp1ppb1/3p1npp/8/3PP1P1/2N1B3/PPP1BP1P/R2QK1NR")
+    Fen.parse("rnbq1rk1/ppp1ppb1/3p1npp/8/3PP1P1/2N1B3/PPP1BP1P/R2QK1NR w KQ - 0 1")
     |> Option.getOrElse(Chess.Setup.default);
+  
+  Js.Console.log(parsed); 
+  // Js.Console.log(ReludeParse.Parser.runParser("KQ", Fen.Parser.castleOptions)); 
 
   [@react.component]
   let make = () => {

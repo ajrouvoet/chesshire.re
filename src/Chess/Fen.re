@@ -79,13 +79,41 @@ module Parser {
     |> P.map(List.toArray)
     |> P.filter(a => Array.length(a) == 8)
     |> P.map(Array.flatten);
+
+  let color =
+        (P.str("w") |> P.map(_ => White))
+    <|> (P.str("b") |> P.map(_ => Black))
+       
+  let sideOf = (s: string) => {
+    switch (String.toLowerCase(s)) {
+    | "kq" => P.pure(BothSides)
+    | "k"  => P.pure(KingSide)
+    | "q"  => P.pure(QueenSide)
+    | _    => P.pure(NoSides)
+    }
+  };
+
+  let castleOptions = {
+    let sides = 
+      (P.str("-") |> P.map (_ => (NoSides, NoSides))) 
+      <|> P.tuple2
+        ( (P.tries(P.str("KQ")) <|> P.str("K") <|> P.str("Q") <|> P.str("")) >>= sideOf
+        , (P.tries(P.str("kq")) <|> P.str("k") <|> P.str("q") <|> P.str("")) >>= sideOf
+        );
+        
+    sides |> P.map(((ws, bs)) => byColor(~white= ws, ~black=bs))
+  }
+
+  let setup = ((b, t, c) => ({...Setup.default, pieces: b, turn: t, castling: c}))
+      <$> board
+      <*> (P.ws *> color)
+      <*> (P.ws *> castleOptions) ;
 };
 
 let parse = (fen: string): option(setup) => {
   open ReludeParse.Parser;
 
-  Parser.board
+  Parser.setup
     |> runParser(fen)
     |> Result.toOption
-    |> Option.map(board => ({...Setup.default, pieces: board}))
 };

@@ -12,6 +12,7 @@ module Color {
 
 type square = int;
 type squareCoord = (int, int);
+type sides  = NoSides | KingSide | QueenSide | BothSides;
 
 module SquareComparable =
   Belt.Id.MakeComparable({
@@ -22,7 +23,7 @@ module SquareComparable =
 type squares = Belt.Set.t(square, SquareComparable.identity);
 
 module Square = {
-  let getCoord = (sq: square): squareCoord => (7 - (sq mod 8), sq / 8);
+  let getCoord = (sq: square): squareCoord => (sq mod 8, sq / 8);
 }
 
 module Squares = {
@@ -89,7 +90,7 @@ type piece    = (color, role);
 
 module Piece {
   let fromSAN = (p: string): option(piece) => {
-    let color = String.toLowerCase(p) == p ? White : Black;
+    let color = String.toLowerCase(p) == p ? Black : White;
     Role.fromChar(p) |> Option.map(r => (color, r))
   }
 }
@@ -106,7 +107,7 @@ type setup =
   { pieces: board
   , pockets: byColor(material)
   , turn: color
-  , castling: byColor(bool)
+  , castling: byColor(sides)
   , epSquare: option(square)
   , plies: int
   }
@@ -148,7 +149,7 @@ module Setup {
     pieces   : Board.default,
     pockets  : byColor(~white=Material.empty, ~black=Material.empty),
     turn     : White,
-    castling : byColor(~white=true, ~black=true),
+    castling : byColor(~white=BothSides, ~black=BothSides),
     epSquare : None,
     plies    : 0
   };

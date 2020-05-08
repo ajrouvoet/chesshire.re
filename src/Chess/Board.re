@@ -92,8 +92,8 @@ module Square = {
     let (xc,yc) = coord;
 
     let (x, y) = switch perspective {
-      | Black => (Js.Int.toString((7-xc) * squareSize), Js.Int.toString(yc * squareSize))
-      | White => (Js.Int.toString(xc * squareSize), Js.Int.toString((7-yc) * squareSize))
+      | Black => (Js.Int.toString((7-xc) * squareSize), Js.Int.toString((7-yc) * squareSize))
+      | White => (Js.Int.toString(xc * squareSize), Js.Int.toString(yc * squareSize))
     };
 
     <g transform={j|translate($x, $y)|j}>{children}</g>
